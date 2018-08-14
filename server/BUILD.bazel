@@ -1,0 +1,18 @@
+load("@org_pubref_rules_protobuf//go:rules.bzl", "GRPC_COMPILE_DEPS")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "proto_fs.go",
+        "server.go",
+    ],
+    importpath = "github.com/raggledodo/dora/server",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:go_default_library",
+        "//storage:go_default_library",
+        "//vendor/github.com/golang/protobuf/proto:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
+    ] + GRPC_COMPILE_DEPS,
+)

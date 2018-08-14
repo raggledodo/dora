@@ -1,0 +1,9 @@
+package: github.com/raggledodo/dora
+import:
+- package: github.com/sirupsen/logrus
+  version: ^1.0.6
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/grpc
+  version: ^1.14.0
