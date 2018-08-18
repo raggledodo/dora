@@ -2,11 +2,11 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def dependencies():
-    if "com_github_raggledodo_protos" not in native.existing_rules():
+    if "com_github_mingkaic_testify" not in native.existing_rules():
         git_repository(
-            name = "com_github_raggledodo_protos",
-            remote = "https://github.com/raggledodo/protos",
-            commit = "6867f798a9f62838cb6342dede3e9c036772b0cf",
+            name = "com_github_mingkaic_testify",
+            remote = "https://github.com/raggledodo/testify",
+            commit = "604d661fb3a5e22b2c9d69e2190fb0a34621b34b",
         )
 
     # go dependency

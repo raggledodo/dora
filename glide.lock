@@ -1,8 +1,8 @@
 hash: d5a442abbabb137afb56e00811b88d63269d1dff5f48a9f90f59a3e870444237
-updated: 2018-08-11T23:51:31.443141-07:00
+updated: 2018-08-17T23:45:17.212291-07:00
 imports:
 - name: github.com/golang/protobuf
-  version: 89a0c16f4dc2a70c0ed864d8ef64878f24fdaa51
+  version: aa810b61a9c79d51363740d207bb46cf8e620ed5
   subpackages:
   - proto
   - ptypes
@@ -12,11 +12,11 @@ imports:
 - name: github.com/sirupsen/logrus
   version: 3e01752db0189b9157070a0e1668a620f9a85da2
 - name: golang.org/x/crypto
-  version: de0752318171da717af4ce24d0a2e8626afaeb11
+  version: aabede6cba87e37f413b3e60ebfc214f8eeca1b0
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: c39426892332e1bb5ec0a434a079bf82f5d30c54
+  version: aaf60122140d3fcf75376d319f0554393160eb50
   subpackages:
   - context
   - http/httpguts
@@ -26,7 +26,7 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: 98c5dad5d1a0e8a73845ecc8897d0bd56586511d
+  version: 1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded
   subpackages:
   - unix
   - windows
@@ -38,7 +38,7 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: 383e8b2c3b9e36c4076b235b32537292176bae20
+  version: c66870c02cf823ceb633bcd05be3c7cda29976f4
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc

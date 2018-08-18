@@ -3,7 +3,7 @@ workspace(name = "com_github_raggledodo_dora")
 load("//:dora.bzl", "dependencies")
 dependencies()
 
-load("@com_github_raggledodo_protos//:protos.bzl", "dependencies")
+load("@com_github_mingkaic_testify//:testify.bzl", "dependencies")
 dependencies()
 
 # go dependencies

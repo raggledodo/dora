@@ -10,5 +10,5 @@ go_proto_library(
     name = "go_default_library",
     compilers = ["@io_bazel_rules_go//proto:go_grpc"],
     importpath = "github.com/raggledodo/dora/proto",
-    proto = "@com_github_raggledodo_protos//testify:proto",
+    proto = "@com_github_mingkaic_testify//proto:proto",
 )
