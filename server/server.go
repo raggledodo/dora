@@ -28,16 +28,6 @@ var (
 	nothing *proto.Nothing = &proto.Nothing{}
 )
 
-func (m *GRPCMux) AddTestcase(ctx context.Context,
-	testcase *proto.Testcase) (*proto.Nothing, error) {
-	if testcase == nil {
-		return nothing, fmt.Errorf("adding nil testcase")
-	}
-	fname := testcase.GetName()
-	testRes := testcase.GetResults()
-	return nothing, m.database.AddTestResult(fname, testRes)
-}
-
 func (m *GRPCMux) ListTestcases(in *proto.Nothing,
 	stream proto.Dora_ListTestcasesServer) error {
 	return m.database.ListTestcases(func(fname string) error {
@@ -67,6 +57,24 @@ func (m *GRPCMux) GetTestcase(in *proto.Testname,
 		}
 	}
 	return nil
+}
+
+func (m *GRPCMux) AddTestcase(ctx context.Context,
+	testcase *proto.Testcase) (*proto.Nothing, error) {
+	if testcase == nil {
+		return nothing, fmt.Errorf("adding nil testcase")
+	}
+	tname := testcase.GetName()
+	testRes := testcase.GetResults()
+	return nothing, m.database.AddTestResult(tname, testRes)
+}
+
+func (m *GRPCMux) RemoveTestcase(ctx context.Context,
+	testname *proto.Testname) (*proto.Nothing, error) {
+	if testname == nil {
+		return nothing, fmt.Errorf("adding nil testcase")
+	}
+	return nothing, m.database.RemoveTestResult(testname.GetName())
 }
 
 func New(host, storageDir string) *GRPCServer {

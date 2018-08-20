@@ -5,7 +5,9 @@ import (
 )
 
 type Database interface {
-	AddTestResult(string, *proto.TestOutput) error
 	ListTestcases(read func(string)error) error
 	GetTestResults(string) (chan *proto.TestOutput, error)
+
+	AddTestResult(string, *proto.TestOutput) error
+	RemoveTestResult(string) error
 }

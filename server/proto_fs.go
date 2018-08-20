@@ -25,7 +25,7 @@ func NewProtoFS(dirname string) *ProtoFS {
 		os.MkdirAll(dirname, 0700)
 	}
 	path := filepath.Join(dirname, mainProto)
-	store := &proto.TestStorage{}
+	store := &proto.TestStorage{make(map[string]*proto.TestOutputs)}
 	if _, err := os.Stat(path); os.IsExist(err) {
 		b, err := ioutil.ReadFile(path)
 		if err != nil {
@@ -38,18 +38,6 @@ func NewProtoFS(dirname string) *ProtoFS {
 		path: path,
 		store: store,
 	}
-}
-
-func (pfs *ProtoFS) AddTestResult(key string, data *proto.TestOutput) error {
-	store := pfs.store.GetStorage()
-	if outputs, ok := store[key]; ok {
-		outputs.Outputs = append(outputs.Outputs, data)
-	} else {
-		store[key] = &proto.TestOutputs{
-			Outputs: []*proto.TestOutput{data},
-		}
-	}
-	return pfs.update()
 }
 
 func (pfs *ProtoFS) ListTestcases(read func(string)error) error {
@@ -77,6 +65,24 @@ func (pfs *ProtoFS) GetTestResults(testcase string) (chan *proto.TestOutput, err
 		close(out)
 	}()
 	return out, nil
+}
+
+func (pfs *ProtoFS) AddTestResult(key string, data *proto.TestOutput) error {
+	store := pfs.store.GetStorage()
+	if outputs, ok := store[key]; ok {
+		outputs.Outputs = append(outputs.Outputs, data)
+	} else {
+		store[key] = &proto.TestOutputs{
+			Outputs: []*proto.TestOutput{data},
+		}
+	}
+	return pfs.update()
+}
+
+func (pfs *ProtoFS) RemoveTestResult(key string) error {
+	store := pfs.store.GetStorage()
+	delete(store, key)
+	return pfs.update()
 }
 
 func (pfs *ProtoFS) update() error {
