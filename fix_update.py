@@ -8,10 +8,13 @@ import re
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 REMOVE_LINES = [
     '"//vendor/golang.org/x/net/context:go_default_library"',
-    '"//vendor/google.golang.org/grpc:go_default_library"'
+    '"//vendor/google.golang.org/grpc:go_default_library"',
+	'"@io_bazel_rules_go//proto/wkt:empty_go_proto"'
 ]
 QUERY_PATTERN = r'deps\s*=\s*\[\s*((?:.*\n)+)\s*\],'
-REPLACE_CONTENT = 'deps = [%s] + GRPC_COMPILE_DEPS,'
+REPLACE_CONTENT = '''deps = [%s] + [
+		"@com_github_golang_protobuf//ptypes/empty:go_default_library",
+	] + GRPC_COMPILE_DEPS,'''
 FILE = os.path.join(THIS_DIR, "server/BUILD.bazel")
 
 with open(FILE, 'r') as src:
@@ -29,10 +32,12 @@ with open(FILE, 'r') as src:
 										 ',\n    ')
 		content = content.replace(out.group(0), replacement)
 
-line = '''load("@org_pubref_rules_protobuf//go:rules.bzl", "GRPC_COMPILE_DEPS")
-'''
-if line not in content:
-	content = line + content
+lines = [
+	'load("@org_pubref_rules_protobuf//go:rules.bzl", "GRPC_COMPILE_DEPS")',
+]
+for line in lines:
+	if line not in content:
+		content = line + content
 
 if content:
 	with open(FILE, 'w') as dest:

@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/raggledodo/dora/proto"
 	"github.com/raggledodo/dora/storage"
+	protobuf "github.com/golang/protobuf/ptypes/empty"
 )
 
 type (
@@ -25,20 +26,20 @@ type (
 )
 
 var (
-	nothing *proto.Nothing = &proto.Nothing{}
+	empty *protobuf.Empty = &protobuf.Empty{}
 )
 
-func (m *GRPCMux) ListTestcases(in *proto.Nothing,
+func (m *GRPCMux) ListTestcases(in *protobuf.Empty,
 	stream proto.Dora_ListTestcasesServer) error {
 	return m.database.ListTestcases(func(fname string) error {
-		if err := stream.Send(&proto.Testname{fname}); err != nil {
+		if err := stream.Send(&proto.TransferName{fname}); err != nil {
 			return err
 		}
 		return nil
 	})
 }
 
-func (m *GRPCMux) GetTestcase(in *proto.Testname,
+func (m *GRPCMux) GetTestcase(in *proto.TransferName,
 	stream proto.Dora_GetTestcaseServer) error {
 	if in == nil {
 		return fmt.Errorf("getting nil testname")
@@ -60,21 +61,21 @@ func (m *GRPCMux) GetTestcase(in *proto.Testname,
 }
 
 func (m *GRPCMux) AddTestcase(ctx context.Context,
-	testcase *proto.Testcase) (*proto.Nothing, error) {
-	if testcase == nil {
-		return nothing, fmt.Errorf("adding nil testcase")
+	tcase *proto.TransferCase) (*protobuf.Empty, error) {
+	if tcase == nil {
+		return empty, fmt.Errorf("adding nil tcase")
 	}
-	tname := testcase.GetName()
-	testRes := testcase.GetResults()
-	return nothing, m.database.AddTestResult(tname, testRes)
+	tname := tcase.GetName()
+	testRes := tcase.GetResults()
+	return empty, m.database.AddTestResult(tname, testRes)
 }
 
 func (m *GRPCMux) RemoveTestcase(ctx context.Context,
-	testname *proto.Testname) (*proto.Nothing, error) {
+	testname *proto.TransferName) (*protobuf.Empty, error) {
 	if testname == nil {
-		return nothing, fmt.Errorf("adding nil testcase")
+		return empty, fmt.Errorf("adding nil testcase")
 	}
-	return nothing, m.database.RemoveTestResult(testname.GetName())
+	return empty, m.database.RemoveTestResult(testname.GetName())
 }
 
 func New(host, storageDir string) *GRPCServer {

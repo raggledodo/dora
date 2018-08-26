@@ -6,7 +6,7 @@ def dependencies():
         git_repository(
             name = "com_github_mingkaic_testify",
             remote = "https://github.com/raggledodo/testify",
-            commit = "765b0c0dd3b354474d0bc9dcc26b96e13b9de33b",
+            commit = "c3d8a04270b9d483cde3cc13351e544a6ed3b95d",
         )
 
     # go dependency

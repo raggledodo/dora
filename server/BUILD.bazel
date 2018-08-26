@@ -14,5 +14,7 @@ go_library(
         "//storage:go_default_library",
         "//vendor/github.com/golang/protobuf/proto:go_default_library",
         "//vendor/github.com/sirupsen/logrus:go_default_library",
+    ] + [
+        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
     ] + GRPC_COMPILE_DEPS,
 )

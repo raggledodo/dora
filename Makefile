@@ -15,8 +15,10 @@ bazel-update:
 	bazel run //:gazelle
 	python fix_update.py
 
-update: bazel-update
+glide-update:
 	glide update
+
+update: glide-update bazel-update
 
 clean:
 	glide cc

@@ -1,22 +1,23 @@
 hash: d5a442abbabb137afb56e00811b88d63269d1dff5f48a9f90f59a3e870444237
-updated: 2018-08-17T23:45:17.212291-07:00
+updated: 2018-08-26T14:07:15.523751-07:00
 imports:
 - name: github.com/golang/protobuf
-  version: aa810b61a9c79d51363740d207bb46cf8e620ed5
+  version: b27b920f9e71b439b873b17bf99f56467623814a
   subpackages:
   - proto
   - ptypes
   - ptypes/any
   - ptypes/duration
+  - ptypes/empty
   - ptypes/timestamp
 - name: github.com/sirupsen/logrus
   version: 3e01752db0189b9157070a0e1668a620f9a85da2
 - name: golang.org/x/crypto
-  version: aabede6cba87e37f413b3e60ebfc214f8eeca1b0
+  version: 614d502a4dac94afa3a6ce146bd1736da82514c6
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
-  version: aaf60122140d3fcf75376d319f0554393160eb50
+  version: 8a410e7b638dca158bf9e766925842f6651ff828
   subpackages:
   - context
   - http/httpguts
@@ -26,10 +27,11 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: 1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded
+  version: 4910a1d54f876d7b22162a85f4d066d3ee649450
   subpackages:
-  - unix
   - windows
+- name: golang.org/x/sys/unix
+  version: 4910a1d54f876d7b22162a85f4d066d3ee649450
 - name: golang.org/x/text
   version: 6e3c4e7365ddcc329f090f96e4348398f6310088
   subpackages:

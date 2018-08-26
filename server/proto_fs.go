@@ -17,7 +17,7 @@ var _ storage.Database = &ProtoFS{}
 
 type ProtoFS struct {
 	path string
-	store *proto.TestStorage
+	store *proto.CaseStorage
 }
 
 func NewProtoFS(dirname string) *ProtoFS {
@@ -25,7 +25,7 @@ func NewProtoFS(dirname string) *ProtoFS {
 		os.MkdirAll(dirname, 0700)
 	}
 	path := filepath.Join(dirname, mainProto)
-	store := &proto.TestStorage{make(map[string]*proto.TestOutputs)}
+	store := &proto.CaseStorage{make(map[string]*proto.Cases)}
 	if _, err := os.Stat(path); os.IsExist(err) {
 		b, err := ioutil.ReadFile(path)
 		if err != nil {
@@ -50,14 +50,14 @@ func (pfs *ProtoFS) ListTestcases(read func(string)error) error {
 	return nil
 }
 
-func (pfs *ProtoFS) GetTestResults(testcase string) (chan *proto.TestOutput, error) {
-	out := make(chan *proto.TestOutput)
+func (pfs *ProtoFS) GetTestResults(testcase string) (chan *proto.GeneratedCase, error) {
+	out := make(chan *proto.GeneratedCase)
 	store := pfs.store.GetStorage()
 	tcases, ok := store[testcase]
 	if !ok {
 		return nil, fmt.Errorf("testcase %s not found", testcase)
 	}
-	touts := tcases.GetOutputs()
+	touts := tcases.GetCases()
 	go func() {
 		for _, tout := range touts {
 			out <- tout
@@ -67,13 +67,13 @@ func (pfs *ProtoFS) GetTestResults(testcase string) (chan *proto.TestOutput, err
 	return out, nil
 }
 
-func (pfs *ProtoFS) AddTestResult(key string, data *proto.TestOutput) error {
+func (pfs *ProtoFS) AddTestResult(key string, data *proto.GeneratedCase) error {
 	store := pfs.store.GetStorage()
 	if outputs, ok := store[key]; ok {
-		outputs.Outputs = append(outputs.Outputs, data)
+		outputs.Cases = append(outputs.Cases, data)
 	} else {
-		store[key] = &proto.TestOutputs{
-			Outputs: []*proto.TestOutput{data},
+		store[key] = &proto.Cases{
+			Cases: []*proto.GeneratedCase{data},
 		}
 	}
 	return pfs.update()
