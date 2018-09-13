@@ -16,3 +16,9 @@ gazelle_dependencies()
 
 load("@org_pubref_rules_protobuf//go:rules.bzl", "go_proto_repositories")
 go_proto_repositories()
+
+load(
+    "@io_bazel_rules_docker//go:image.bzl",
+    _go_image_repos = "repositories",
+)
+_go_image_repos()

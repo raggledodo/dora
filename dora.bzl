@@ -6,7 +6,7 @@ def dependencies():
         git_repository(
             name = "com_github_mingkaic_testify",
             remote = "https://github.com/raggledodo/testify",
-            commit = "c3d8a04270b9d483cde3cc13351e544a6ed3b95d",
+            commit = "d51725bea2dd2837c69617548613a7a9c22ddadc",
         )
 
     # go dependency
@@ -22,4 +22,12 @@ def dependencies():
             name = "bazel_gazelle",
             urls = [ "https://github.com/bazelbuild/bazel-gazelle/releases/download/0.13.0/bazel-gazelle-0.13.0.tar.gz" ],
             sha256 = "bc653d3e058964a5a26dcad02b6c72d7d63e6bb88d94704990b908a1445b8758",
+        )
+
+    if "io_bazel_rules_docker" not in native.existing_rules():
+        http_archive(
+            name = "io_bazel_rules_docker",
+            sha256 = "6dede2c65ce86289969b907f343a1382d33c14fbce5e30dd17bb59bb55bb6593",
+            strip_prefix = "rules_docker-0.4.0",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.4.0.tar.gz"],
         )

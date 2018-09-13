@@ -5,8 +5,8 @@ TEST := bazel test $(COMMON_BZL_FLAGS)
 all:
 	bazel run //:dora
 
-build:
-	bazel build //server:go_default_library
+build_dora:
+	bazel build //:dora
 
 fmt:
 	go fmt $(go list ./... | grep -v /vendor/)

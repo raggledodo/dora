@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net"
+	"math/rand"
 	"google.golang.org/grpc"
 	"sync"
 
@@ -58,6 +59,31 @@ func (m *GRPCMux) GetTestcase(in *proto.TransferName,
 		}
 	}
 	return nil
+}
+
+func (m *GRPCMux) GetOneTestcase(ctx context.Context,
+	in *proto.TransferName) (*proto.GeneratedCase, error) {
+	if in == nil {
+		return nil, fmt.Errorf("getting nil testname")
+	}
+	fname := in.GetName()
+	resultCh, err := m.database.GetTestResults(fname)
+	if err != nil {
+		return nil, err
+	}
+	if resultCh == nil {
+		return nil, fmt.Errorf("db error: got nil test results")
+	}
+	results := []*proto.GeneratedCase{}
+	for result := range resultCh {
+		results = append(results, result)
+	}
+	ntests := len(results)
+	if ntests > 0 {
+		return nil, fmt.Errorf("no tests for %s", fname)
+	}
+	idx := rand.Intn(ntests)
+	return results[idx], nil
 }
 
 func (m *GRPCMux) AddTestcase(ctx context.Context,

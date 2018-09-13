@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/raggledodo/dora/server"
-	"fmt"
-	"flag"
-	"sync"
-	"github.com/sirupsen/logrus"
 	"encoding/json"
+	"flag"
+	"fmt"
+	"github.com/raggledodo/dora/server"
+	"github.com/sirupsen/logrus"
+	"sync"
 )
 
 var cfg Config
 
 type Config struct {
-	Port uint
+	Port  uint
 	PbDir string
 }
 
@@ -23,7 +23,7 @@ const (
 
 func main() {
 	flag.UintVar(&cfg.Port, "port", DefPorts, "server port")
-	flag.StringVar(&cfg.PbDir,"pbdir", DefPbDir, "protobuf storage path")
+	flag.StringVar(&cfg.PbDir, "pbdir", DefPbDir, "protobuf storage path")
 	flag.Parse()
 
 	b, err := json.Marshal(cfg)
