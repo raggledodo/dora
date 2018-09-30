@@ -104,6 +104,12 @@ func (m *GRPCMux) RemoveTestcase(ctx context.Context,
 	return empty, m.database.RemoveTestResult(testname.GetName())
 }
 
+func (m *GRPCMux) CheckHealth(ctx context.Context, _ *protobuf.Empty) (*proto.HealthCheckResponse, error) {
+	return &proto.HealthCheckResponse{
+		Status: proto.HealthCheckResponse_SERVING,
+	}, nil
+}
+
 func New(host, storageDir string) *GRPCServer {
 	listener, err := net.Listen("tcp", host)
 	if err != nil {

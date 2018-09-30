@@ -30,13 +30,21 @@ go_library(
 # docker image
 go_image(
     name = "dora_image_base",
-    embed = [":go_default_library"],
+    srcs = ["main.go"],
+    deps = [
+        "//server:go_default_library",
+        "//vendor/github.com/sirupsen/logrus:go_default_library",
+    ],
+    goarch = "amd64",
+    goos = "linux",
+    pure = "on",
 )
 
 container_image(
     name = "dora_image",
     base = ":dora_image_base",
     ports = ["8581"],
+    stamp = True,
 )
 
 container_push(
