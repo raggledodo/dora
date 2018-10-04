@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/raggledodo/dora/server"
-	"github.com/sirupsen/logrus"
+	"log"
 	"sync"
+
+	"github.com/raggledodo/dora/data"
 )
 
 var cfg Config
@@ -28,10 +29,10 @@ func main() {
 
 	b, err := json.Marshal(cfg)
 	if err == nil {
-		logrus.Info("config: ", string(b))
+		log.Print("config: ", string(b))
 	}
 
-	srv := server.New(fmt.Sprintf(":%d", cfg.Port), cfg.PbDir)
+	srv := NewDoraServer(fmt.Sprintf(":%d", cfg.Port), data.NewPbFS(cfg.PbDir))
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	srv.Start(wg)

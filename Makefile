@@ -3,23 +3,16 @@ COMMON_BZL_FLAGS := --test_output=all --cache_test_results=no
 TEST := bazel test $(COMMON_BZL_FLAGS)
 
 all:
-	bazel run //:dora
+	bazel run //server:main
 
 build_dora:
-	bazel build //:dora
+	bazel build ...
 
 fmt:
-	go fmt $(go list ./... | grep -v /vendor/)
+	gofmt -s -w .
 
-bazel-update:
-	bazel run //:gazelle
-	python fix_update.py
-
-glide-update:
-	glide update
-
-update: glide-update bazel-update
+update:
+	gazelle fix
 
 clean:
-	glide cc
 	bazel clean
