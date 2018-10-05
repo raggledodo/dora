@@ -44,12 +44,19 @@ go_binary(
 # docker image
 go_image(
     name = "dora_image_base",
-    srcs = ["main.go"],
+    srcs = [
+        "dora.go",
+        "main.go",
+    ],
     goarch = "amd64",
     goos = "linux",
     pure = "on",
     deps = [
-        "//server:go_default_library",
+        "//data:go_default_library",
+        "//proto:go_default_library",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
     ],
 )
 
