@@ -5,7 +5,7 @@ PLATFORM_FLAG := --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
 TEST := bazel test $(COMMON_BZL_FLAGS)
 
 all:
-	bazel run //server:main
+	bazel run //server:main -- -port 10000
 
 docker:
 	bazel build $(PLATFORM_FLAG) //server:dora_image

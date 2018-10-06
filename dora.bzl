@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def dependencies():
@@ -23,4 +23,11 @@ def dependencies():
             sha256 = "29d109605e0d6f9c892584f07275b8c9260803bf0c6fcb7de2623b2bedc910bd",
             strip_prefix = "rules_docker-0.5.1",
             urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.5.1.tar.gz"],
+        )
+
+    if "com_github_grpc_ecosystem_grpc_gateway" not in native.existing_rules():
+        git_repository(
+            name = "com_github_grpc_ecosystem_grpc_gateway",
+            remote = "https://github.com/grpc-ecosystem/grpc-gateway",
+            commit = "aeab1d96e0f1368d243e2e5f526aa29d495517bb",
         )

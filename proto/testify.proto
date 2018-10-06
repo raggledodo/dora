@@ -80,7 +80,6 @@ service Dora {
     rpc ListTestcases(ListRequest) returns (ListResponse) {
         option (google.api.http) = {
             get: "/v1/testcases"
-            body: "*"
         };
     }
 
@@ -94,13 +93,12 @@ service Dora {
     rpc RemoveTestcase(RemoveRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/v1/testcases"
-            body: "*"
         };
     }
 
     rpc CheckHealth(google.protobuf.Empty) returns (HealthCheckResponse) {
         option (google.api.http) = {
-            get: "/v1/healthcheck"
+            get: "/v1/checkhealth"
         };
     }
 }

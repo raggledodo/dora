@@ -31,18 +31,21 @@ func NewPbFS(dirname string) Database {
 		if os.IsNotExist(err) {
 			log.Printf("creating new file @ %s", path)
 		} else {
-			log.Printf("failed to read data from %s", path)
+			log.Printf("Failed to read data from %s: %v", path, err)
 		}
 	}
 	out.store = store
 	return out
 }
 
-func (pfs *pbFS) ListTestcases(filter *Filter) (map[string]*proto.GeneratedTest, error) {
+func (pfs *pbFS) ListTestcases(filter *Filter) (
+	map[string]*proto.GeneratedTest, error) {
 	if pfs.store == nil {
 		store, err := pfs.startTransaction()
 		if err != nil {
-			log.Printf("failed to read data from %s for testcase retrieval", pfs.path)
+			log.Printf(
+				"Failed to read data from %s for testcase retrieval: %v",
+				pfs.path, err)
 			return nil, err
 		}
 		pfs.store = store
@@ -87,7 +90,8 @@ func (pfs *pbFS) RemoveTestcases(tnames []string) error {
 	store := tx.GetStorage()
 	for _, tname := range tnames {
 		if _, ok := store[tname]; !ok {
-			return fmt.Errorf("failed to delete test %s: does not exist", tname)
+			return fmt.Errorf(
+				"Failed to delete test %s: does not exist", tname)
 		}
 		delete(store, tname)
 	}

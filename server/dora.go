@@ -1,28 +1,30 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"net"
-	"sync"
-
-	"google.golang.org/grpc"
+	"net/http"
+	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/raggledodo/dora/data"
 	"github.com/raggledodo/dora/proto"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type (
-	DoraServer struct {
-		*grpc.Server
-		service  *DoraService
-		listener net.Listener
-	}
-
 	DoraService struct {
 		db data.Database
+	}
+	Credentials struct {
+		Key  *tls.Certificate
+		Pool *x509.CertPool
 	}
 )
 
@@ -67,34 +69,61 @@ func (m *DoraService) RemoveTestcase(ctx context.Context,
 
 func (m *DoraService) CheckHealth(ctx context.Context, _ *empty.Empty) (
 	*proto.HealthCheckResponse, error) {
+	fmt.Println("health called")
 	return &proto.HealthCheckResponse{
 		Status: proto.HealthCheckResponse_SERVING,
 	}, nil
 }
 
-func NewDoraServer(host string, db data.Database) *DoraServer {
-	listener, err := net.Listen("tcp", host)
+func Serve(host string, db data.Database) {
+	log.Printf("Serving on %s", host)
+
+	opts := []grpc.ServerOption{
+		grpc.Creds(credentials.NewClientTLSFromCert(demoCertPool, host))}
+
+	grpcServer := grpc.NewServer(opts...)
+	proto.RegisterDoraServer(grpcServer, &DoraService{db: db})
+	ctx := context.Background()
+
+	dcreds := credentials.NewTLS(&tls.Config{
+		ServerName: host,
+		RootCAs:    demoCertPool,
+	})
+	dopts := []grpc.DialOption{grpc.WithTransportCredentials(dcreds)}
+
+	mux := http.NewServeMux()
+
+	gwmux := runtime.NewServeMux()
+	err := proto.RegisterDoraHandlerFromEndpoint(ctx, gwmux, host, dopts)
+	if err != nil {
+		log.Fatalf("Failed to register http: %v", err)
+	}
+	mux.Handle("/", gwmux)
+
+	conn, err := net.Listen("tcp", host)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := grpc.NewServer()
-	service := &DoraService{db: db}
-	proto.RegisterDoraServer(server, service)
-
-	return &DoraServer{
-		Server:   server,
-		service:  service,
-		listener: listener,
+	httpServer := &http.Server{
+		Addr: host,
+		Handler: http.HandlerFunc(
+			func(writer http.ResponseWriter, req *http.Request) {
+				if req.ProtoMajor == 2 && strings.Contains(
+					req.Header.Get("Content-Type"), "application/grpc") {
+					grpcServer.ServeHTTP(writer, req)
+				} else {
+					mux.ServeHTTP(writer, req)
+				}
+			}),
+		TLSConfig: &tls.Config{
+			Certificates: []tls.Certificate{*demoKeyPair},
+			NextProtos:   []string{"h2"},
+		},
 	}
-}
 
-func (server *DoraServer) Start(wg *sync.WaitGroup) {
-	defer wg.Done()
-	log.Print("Dora server running")
-	err := server.Serve(server.listener)
-	if err != nil && err != grpc.ErrServerStopped {
-		log.Fatalf("Dora server error: %v", err)
+	err = httpServer.Serve(tls.NewListener(conn, httpServer.TLSConfig))
+	if err != nil {
+		log.Fatalf("Failed to listen and serve: %v", err)
 	}
-	log.Print("Dora server stopped")
 }
