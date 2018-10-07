@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+licenses(["notice"])
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "srcs",
+    srcs = [
+        "BUILD.bazel",
+        "tcase.go",
+    ],
+)
+
+######### LIBRARY #########
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "data.go",
+        "proto_fs.go",
+    ],
+    importpath = "github.com/raggledodo/dora/data",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//proto:go_default_library",
+        "@com_github_golang_protobuf//proto:go_default_library",
+    ],
+)

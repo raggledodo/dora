@@ -1,20 +1,83 @@
-load("@org_pubref_rules_protobuf//go:rules.bzl", "GRPC_COMPILE_DEPS")
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_docker//container:container.bzl", "container_push", "container_image")
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+licenses(["notice"])
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "srcs",
+    srcs = [
+        "BUILD.bazel",
+        "main.go",
+    ],
+)
+
+######### LIBRARY #########
 
 go_library(
     name = "go_default_library",
     srcs = [
-        "proto_fs.go",
-        "server.go",
+        "dora.go",
+        "main.go",
     ],
     importpath = "github.com/raggledodo/dora/server",
-    visibility = ["//visibility:public"],
+    visibility = ["//visibility:private"],
     deps = [
+        "//data:go_default_library",
         "//proto:go_default_library",
-        "//storage:go_default_library",
-        "//vendor/github.com/golang/protobuf/proto:go_default_library",
-        "//vendor/github.com/sirupsen/logrus:go_default_library",
-    ] + [
-        "@com_github_golang_protobuf//ptypes/empty:go_default_library",
-    ] + GRPC_COMPILE_DEPS,
+        "@com_github_grpc_ecosystem_grpc_gateway//runtime:go_default_library",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//credentials:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "main",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+    data = ["//:credentials"],
+)
+
+# docker image
+go_image(
+    name = "dora_image_base",
+    srcs = [
+        "dora.go",
+        "main.go",
+    ],
+    goarch = "amd64",
+    goos = "linux",
+    pure = "on",
+    deps = [
+        "//data:go_default_library",
+        "//proto:go_default_library",
+        "@com_github_grpc_ecosystem_grpc_gateway//runtime:go_default_library",
+        "@io_bazel_rules_go//proto/wkt:empty_go_proto",
+        "@org_golang_google_grpc//:go_default_library",
+        "@org_golang_google_grpc//credentials:go_default_library",
+        "@org_golang_x_net//context:go_default_library",
+    ],
+    data = ["//:credentials"],
+)
+
+container_image(
+    name = "dora_image",
+    base = "//server:dora_image_base",
+    ports = ["8581"],
+    stamp = True,
+)
+
+container_push(
+    name = "dora_push",
+    format = "Docker",
+    image = "//server:dora_image",
+    registry = "index.docker.io",
+    repository = "mkaichen/dora_server",
+    tag = "latest",
 )

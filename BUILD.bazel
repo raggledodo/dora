@@ -1,0 +1,29 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+licenses(["notice"])
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "srcs",
+    srcs = [
+        "BUILD.bazel",
+        "//api:srcs",
+        "//main:srcs",
+        "//proto:srcs",
+        "//storage:srcs",
+    ],
+)
+
+filegroup(
+    name = "credentials",
+    srcs = [
+        "certs/server.key",
+        "certs/server.pem",
+    ],
+)
+
+# ===== GO GENERATOR =====
+
+# gazelle:prefix github.com/raggledodo/dora
+gazelle(name = "gazelle")

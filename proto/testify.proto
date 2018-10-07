@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+option go_package = "github.com/raggledodo/dora/proto";
+
+package testify;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+message Bytes { bytes data = 1; }
+message Doubles { repeated double data = 1; }
+message Floats { repeated float data = 1; }
+message Int32s { repeated int32 data = 1; }
+message Int64s { repeated int64 data = 1; }
+message Uint32s { repeated uint32 data = 1; }
+message Uint64s { repeated uint64 data = 1; }
+message Tree {
+    uint32 root = 1;
+    Graph graph = 2;
+}
+message Graph {
+    bytes matrix = 1;
+    uint32 nverts = 2;
+}
+
+message CaseData {
+    oneof data {
+        Bytes dbytes = 1;
+        Doubles ddoubles = 2;
+        Floats dfloats = 3;
+        Int32s dint32s = 4;
+        Int64s dint64s = 5;
+        Uint32s duint32s = 6;
+        Uint64s duint64s = 7;
+        Tree dtree = 8;
+        Graph dgraph = 9;
+    }
+}
+
+message GeneratedCase {
+    map<string,CaseData> inputs = 1;
+    map<string,CaseData> outputs = 2;
+}
+
+// Requests
+
+message ListRequest {
+    repeated string names = 1;
+    uint32 ncase_limit = 2;
+}
+
+message AddRequest
+{
+    string name = 1;
+    GeneratedCase payload = 2;
+}
+
+message RemoveRequest {
+    repeated string names = 1;
+}
+
+// Responses
+
+message ListResponse {
+    map<string,GeneratedTest> tests = 1;
+}
+
+message HealthCheckResponse {
+    enum Status {
+        UNKNOWN = 0;
+        SERVING = 1;
+        NOT_SERVING = 2;
+    }
+    Status status = 1;
+}
+
+// Service
+
+service Dora {
+    rpc ListTestcases(ListRequest) returns (ListResponse) {
+        option (google.api.http) = {
+            get: "/v1/testcases"
+        };
+    }
+
+    rpc AddTestcase(AddRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/v1/testcases"
+            body: "*"
+        };
+    }
+
+    rpc RemoveTestcase(RemoveRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/v1/testcases"
+        };
+    }
+
+    rpc CheckHealth(google.protobuf.Empty) returns (HealthCheckResponse) {
+        option (google.api.http) = {
+            get: "/v1/checkhealth"
+        };
+    }
+}
+
+// Storage objects
+
+message GeneratedTest {
+    repeated GeneratedCase cases = 1;
+}
+
+message TestStorage {
+    map<string,GeneratedTest> storage = 1;
+}
