@@ -15,6 +15,14 @@ filegroup(
     ],
 )
 
+filegroup(
+    name = "credentials",
+    srcs = [
+        "certs/server.key",
+        "certs/server.pem",
+    ],
+)
+
 # ===== GO GENERATOR =====
 
 # gazelle:prefix github.com/raggledodo/dora

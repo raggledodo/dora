@@ -6,27 +6,38 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	"github.com/raggledodo/dora/data"
-	"github.com/raggledodo/dora/insecure"
 )
 
 var cfg Config
 
 type Config struct {
-	Port  uint
-	PbDir string
+	Port     uint
+	PbDir    string
+	Keyfile  string
+	Certfile string
+}
+
+type Certificate struct {
+	Key  *tls.Certificate
+	Pool *x509.CertPool
 }
 
 const (
-	DefPorts = 58581
-	DefPbDir = "/tmp/protodb"
+	DefPorts       = 10000
+	DefPbDir       = "/tmp/protodb"
+	DefKeyfile     = "certs/server.key"
+	DefCertificate = "certs/server.pem"
 )
 
 func init() {
 	flag.UintVar(&cfg.Port, "port", DefPorts, "server port")
 	flag.StringVar(&cfg.PbDir, "pbdir", DefPbDir, "protobuf storage path")
+	flag.StringVar(&cfg.Keyfile, "key", DefKeyfile, "rsa private key file")
+	flag.StringVar(&cfg.Certfile, "cert", DefCertificate, "certificate file")
 	flag.Parse()
 
 	b, err := json.Marshal(cfg)
@@ -35,23 +46,29 @@ func init() {
 	}
 }
 
-var (
-	demoKeyPair  *tls.Certificate
-	demoCertPool *x509.CertPool
-)
+func check(err error) {
+	if err != nil {
+		log.Panic(err)
+	}
+}
 
 func main() {
-	var err error
-	pair, err := tls.X509KeyPair([]byte(insecure.Cert), []byte(insecure.Key))
-	if err != nil {
-		panic(err)
-	}
-	demoKeyPair = &pair
-	demoCertPool = x509.NewCertPool()
-	ok := demoCertPool.AppendCertsFromPEM([]byte(insecure.Cert))
+	kfile, err := ioutil.ReadFile(cfg.Keyfile)
+	check(err)
+	cert, err := ioutil.ReadFile(cfg.Certfile)
+	check(err)
+	key, err := tls.X509KeyPair(cert, kfile)
+	check(err)
+	pool := x509.NewCertPool()
+	ok := pool.AppendCertsFromPEM(cert)
 	if !ok {
-		panic("bad certs")
+		log.Panic("bad certs")
+	}
+	certificate := Certificate{
+		Key:  &key,
+		Pool: pool,
 	}
 
-	Serve(fmt.Sprintf("localhost:%d", cfg.Port), data.NewPbFS(cfg.PbDir))
+	Serve(fmt.Sprintf("localhost:%d", cfg.Port),
+		certificate, data.NewPbFS(cfg.PbDir))
 }

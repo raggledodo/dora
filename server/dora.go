@@ -30,8 +30,8 @@ type (
 
 var _ proto.DoraServer = &DoraService{}
 
-func (m *DoraService) ListTestcases(ctx context.Context, req *proto.ListRequest) (
-	*proto.ListResponse, error) {
+func (m *DoraService) ListTestcases(ctx context.Context,
+	req *proto.ListRequest) (*proto.ListResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("nil ListRequest")
 	}
@@ -45,8 +45,8 @@ func (m *DoraService) ListTestcases(ctx context.Context, req *proto.ListRequest)
 	}, nil
 }
 
-func (m *DoraService) AddTestcase(ctx context.Context, req *proto.AddRequest) (
-	*empty.Empty, error) {
+func (m *DoraService) AddTestcase(ctx context.Context,
+	req *proto.AddRequest) (*empty.Empty, error) {
 	if req == nil {
 		return nil, fmt.Errorf("nil AddRequest")
 	}
@@ -69,17 +69,16 @@ func (m *DoraService) RemoveTestcase(ctx context.Context,
 
 func (m *DoraService) CheckHealth(ctx context.Context, _ *empty.Empty) (
 	*proto.HealthCheckResponse, error) {
-	fmt.Println("health called")
 	return &proto.HealthCheckResponse{
 		Status: proto.HealthCheckResponse_SERVING,
 	}, nil
 }
 
-func Serve(host string, db data.Database) {
+func Serve(host string, certificate Certificate, db data.Database) {
 	log.Printf("Serving on %s", host)
 
 	opts := []grpc.ServerOption{
-		grpc.Creds(credentials.NewClientTLSFromCert(demoCertPool, host))}
+		grpc.Creds(credentials.NewClientTLSFromCert(certificate.Pool, host))}
 
 	grpcServer := grpc.NewServer(opts...)
 	proto.RegisterDoraServer(grpcServer, &DoraService{db: db})
@@ -87,7 +86,7 @@ func Serve(host string, db data.Database) {
 
 	dcreds := credentials.NewTLS(&tls.Config{
 		ServerName: host,
-		RootCAs:    demoCertPool,
+		RootCAs:    certificate.Pool,
 	})
 	dopts := []grpc.DialOption{grpc.WithTransportCredentials(dcreds)}
 
@@ -117,7 +116,7 @@ func Serve(host string, db data.Database) {
 				}
 			}),
 		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{*demoKeyPair},
+			Certificates: []tls.Certificate{*certificate.Key},
 			NextProtos:   []string{"h2"},
 		},
 	}
