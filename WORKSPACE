@@ -63,3 +63,9 @@ go_repository(
     commit = "eb3733d160e74a9c7e442f435eb3bea458e1d19f",
     importpath = "gopkg.in/yaml.v2",
 )
+
+load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cpp_proto_repositories")
+cpp_proto_repositories()
+
+load("@org_pubref_rules_protobuf//python:rules.bzl", "py_proto_repositories")
+py_proto_repositories()

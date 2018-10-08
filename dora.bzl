@@ -1,5 +1,37 @@
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:git.bzl",
+    "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+GOOGLEAPIS_BUILD = """
+load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
+load("@org_pubref_rules_protobuf//python:rules.bzl", "py_proto_library")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "annotations_proto",
+    srcs = [
+        "google/api/annotations.proto",
+        "google/api/http.proto",
+    ],
+)
+
+cc_proto_library(
+    name = "annotations_cc_proto",
+    protos = [":annotations_proto"],
+    imports = ["external/com_google_protobuf/src"],
+    inputs = ["@com_google_protobuf//:well_known_protos"],
+)
+
+py_proto_library(
+    name = "annotations_py_proto",
+    protos = [":annotations_proto"],
+    imports = ["external/com_google_protobuf/src"],
+    inputs = ["@com_google_protobuf//:well_known_protos"],
+)
+"""
 
 def dependencies():
     # go dependency
@@ -30,4 +62,20 @@ def dependencies():
             name = "com_github_grpc_ecosystem_grpc_gateway",
             remote = "https://github.com/grpc-ecosystem/grpc-gateway",
             commit = "aeab1d96e0f1368d243e2e5f526aa29d495517bb",
+        )
+
+    # protobuf dependency
+    if "org_pubref_rules_protobuf" not in native.existing_rules():
+        git_repository(
+            name = "org_pubref_rules_protobuf",
+            remote = "https://github.com/mingkaic/rules_protobuf",
+            commit = "f5615fa9d544d0a69cd73d8716364d8bd310babe",
+        )
+
+    if "com_github_googleapis" not in native.existing_rules():
+        new_git_repository(
+            name = "com_github_googleapis",
+            remote = "https://github.com/googleapis/googleapis",
+            commit = "8f1de3d40e2835d30f4c0bc861b4e8e8ec551138",
+            build_file_content = GOOGLEAPIS_BUILD,
         )

@@ -1,5 +1,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
+load("@org_pubref_rules_protobuf//python:rules.bzl", "py_proto_library")
 
 licenses(["notice"])
 
@@ -41,9 +43,43 @@ go_library(
 
 proto_library(
     name = "proto_proto",
-    srcs = ["testify.proto"],
+    srcs = [":proto"],
     deps = [
         "@com_google_protobuf//:empty_proto",
         "@go_googleapis//google/api:annotations_proto",
     ],
+)
+
+cc_proto_library(
+    name = "cc_proto",
+    protos = [":proto"],
+    imports = [
+        "external/com_google_protobuf/src",
+        "external/com_github_googleapis",
+    ],
+    inputs = [
+        "@com_google_protobuf//:well_known_protos",
+        "@com_github_googleapis//:annotations_proto",
+    ],
+    deps = [
+        "@com_github_googleapis//:annotations_cc_proto",
+    ],
+    with_grpc = True,
+)
+
+py_proto_library(
+    name = "py_proto",
+    protos = [":proto"],
+    imports = [
+        "external/com_google_protobuf/src",
+        "external/com_github_googleapis",
+    ],
+    inputs = [
+        "@com_google_protobuf//:well_known_protos",
+        "@com_github_googleapis//:annotations_proto",
+    ],
+    deps = [
+        "@com_github_googleapis//:annotations_py_proto",
+    ],
+    with_grpc = True,
 )

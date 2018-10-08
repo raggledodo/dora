@@ -39,9 +39,9 @@ go_library(
 
 go_binary(
     name = "main",
+    data = ["//:credentials"],
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
-    data = ["//:credentials"],
 )
 
 # docker image
