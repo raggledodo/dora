@@ -46,6 +46,7 @@ proto_library(
     srcs = [":proto"],
     deps = [
         "@com_google_protobuf//:empty_proto",
+        "@com_google_protobuf//:timestamp_proto",
         "@go_googleapis//google/api:annotations_proto",
     ],
 )

@@ -5,6 +5,7 @@ option go_package = "github.com/raggledodo/dora/proto";
 package testify;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 
 message Bytes { bytes data = 1; }
@@ -40,13 +41,15 @@ message CaseData {
 message GeneratedCase {
     map<string,CaseData> inputs = 1;
     map<string,CaseData> outputs = 2;
+    google.protobuf.Timestamp created = 3;
 }
 
 // Requests
 
 message ListRequest {
-    repeated string names = 1;
-    uint32 ncase_limit = 2;
+    repeated string test_names = 1;
+    google.protobuf.Timestamp tests_after = 2;
+    google.protobuf.Timestamp tests_until = 3;
 }
 
 message AddRequest

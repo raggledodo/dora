@@ -52,15 +52,18 @@ func (pfs *pbFS) ListTestcases(filter *Filter) (
 	}
 	schemas := make(map[string]*proto.GeneratedTest)
 	store := pfs.store.GetStorage()
-	limit := filter.NcaseLimit
-	if filter.Names != nil {
-		for _, tname := range filter.Names {
-			test := store[tname]
-			schemas[tname] = filterTest(test, limit)
+	between := filter.TestBetween
+	if filter.TestNames != nil {
+		for _, testname := range filter.TestNames {
+			test, ok := store[testname]
+			if !ok {
+				return nil, fmt.Errorf("Test %s not found", testname)
+			}
+			schemas[testname] = filterTest(test, between)
 		}
 	} else {
-		for tname, test := range store {
-			schemas[tname] = filterTest(test, limit)
+		for testname, test := range store {
+			schemas[testname] = filterTest(test, between)
 		}
 	}
 	return schemas, nil
@@ -128,14 +131,21 @@ func (pfs *pbFS) completeTransaction(tx *proto.TestStorage) error {
 	return nil
 }
 
-func filterTest(test *proto.GeneratedTest, limit uint32) *proto.GeneratedTest {
-	if limit == 0 {
+func filterTest(test *proto.GeneratedTest,
+	between *TimeRange) *proto.GeneratedTest {
+	if between == nil {
 		return test
 	}
 
 	if test != nil {
+		cases := make([]*proto.GeneratedCase, 0, len(test.Cases))
+		for _, gcase := range test.Cases {
+			if gcase != nil && between.IsBetween(gcase.Created) {
+				cases = append(cases, gcase)
+			}
+		}
 		return &proto.GeneratedTest{
-			Cases: test.Cases[:limit],
+			Cases: cases[:len(cases)],
 		}
 	}
 	return nil

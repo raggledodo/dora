@@ -35,7 +35,10 @@ func (m *DoraService) ListTestcases(ctx context.Context,
 	if req == nil {
 		return nil, fmt.Errorf("nil ListRequest")
 	}
-	filter := data.ListReqToFilter(req)
+	filter, err := data.ListReqToFilter(req)
+	if err != nil {
+		return nil, err
+	}
 	tests, err := m.db.ListTestcases(filter)
 	if err != nil {
 		return nil, err
