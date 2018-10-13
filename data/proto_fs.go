@@ -105,15 +105,16 @@ func (pfs *pbFS) startTransaction() (*proto.TestStorage, error) {
 	transaction := &proto.TestStorage{
 		Storage: make(map[string]*proto.GeneratedTest),
 	}
-	if _, err := os.Stat(pfs.path); !os.IsExist(err) {
-		// path does not exist or other err
-		return nil, err
-	}
-	b, err := ioutil.ReadFile(pfs.path)
-	if err != nil {
-		return nil, err
-	}
-	if err = pb.Unmarshal(b, transaction); err != nil {
+	_, err := os.Stat(pfs.path)
+	if err == nil || os.IsExist(err) {
+		b, err := ioutil.ReadFile(pfs.path)
+		if err != nil {
+			return nil, err
+		}
+		if err = pb.Unmarshal(b, transaction); err != nil {
+			return nil, err
+		}
+	} else if !os.IsNotExist(err) { // hypothetical
 		return nil, err
 	}
 	return transaction, nil

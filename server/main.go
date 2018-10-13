@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -15,6 +14,7 @@ import (
 var cfg Config
 
 type Config struct {
+	Host     string
 	Port     uint
 	PbDir    string
 	Keyfile  string
@@ -30,10 +30,13 @@ const (
 	DefPorts       = 10000
 	DefPbDir       = "/tmp/protodb"
 	DefKeyfile     = "certs/server.key"
-	DefCertificate = "certs/server.pem"
+	DefCertificate = "certs/server.crt"
+	DefHost        = "localhost"
 )
 
 func init() {
+	flag.StringVar(&cfg.Host, "host", DefHost,
+		"host name used as common name in certificate")
 	flag.UintVar(&cfg.Port, "port", DefPorts, "server port")
 	flag.StringVar(&cfg.PbDir, "pbdir", DefPbDir, "protobuf storage path")
 	flag.StringVar(&cfg.Keyfile, "key", DefKeyfile, "rsa private key file")
@@ -69,6 +72,5 @@ func main() {
 		Pool: pool,
 	}
 
-	Serve(fmt.Sprintf("localhost:%d", cfg.Port),
-		certificate, data.NewPbFS(cfg.PbDir))
+	Serve(cfg.Host, cfg.Port, certificate, data.NewPbFS(cfg.PbDir))
 }

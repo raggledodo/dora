@@ -77,15 +77,18 @@ func (m *DoraService) CheckHealth(ctx context.Context, _ *empty.Empty) (
 	}, nil
 }
 
-func Serve(host string, certificate Certificate, db data.Database) {
-	log.Printf("Serving on %s", host)
+func Serve(host string, port uint, certificate Certificate, db data.Database) {
+	address := fmt.Sprintf("%s:%d", host, port)
+	log.Printf("Serving on %s", address)
 
-	opts := []grpc.ServerOption{
-		grpc.Creds(credentials.NewClientTLSFromCert(certificate.Pool, host))}
+	conn, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	grpcServer := grpc.NewServer(opts...)
+	cred := credentials.NewClientTLSFromCert(certificate.Pool, address)
+	grpcServer := grpc.NewServer(grpc.Creds(cred))
 	proto.RegisterDoraServer(grpcServer, &DoraService{db: db})
-	ctx := context.Background()
 
 	dcreds := credentials.NewTLS(&tls.Config{
 		ServerName: host,
@@ -96,19 +99,15 @@ func Serve(host string, certificate Certificate, db data.Database) {
 	mux := http.NewServeMux()
 
 	gwmux := runtime.NewServeMux()
-	err := proto.RegisterDoraHandlerFromEndpoint(ctx, gwmux, host, dopts)
+	err = proto.RegisterDoraHandlerFromEndpoint(
+		context.Background(), gwmux, address, dopts)
 	if err != nil {
 		log.Fatalf("Failed to register http: %v", err)
 	}
 	mux.Handle("/", gwmux)
 
-	conn, err := net.Listen("tcp", host)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	httpServer := &http.Server{
-		Addr: host,
+		Addr: address,
 		Handler: http.HandlerFunc(
 			func(writer http.ResponseWriter, req *http.Request) {
 				if req.ProtoMajor == 2 && strings.Contains(

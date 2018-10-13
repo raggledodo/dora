@@ -19,7 +19,7 @@ filegroup(
     name = "credentials",
     srcs = [
         "certs/server.key",
-        "certs/server.pem",
+        "certs/server.crt",
     ],
 )
 
