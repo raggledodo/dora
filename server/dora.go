@@ -77,7 +77,7 @@ func (m *DoraService) CheckHealth(ctx context.Context, _ *empty.Empty) (
 	}, nil
 }
 
-func Serve(host string, port uint, certificate Certificate, db data.Database) {
+func Serve(host, servername string, port uint, certificate Certificate, db data.Database) {
 	address := fmt.Sprintf("%s:%d", host, port)
 	log.Printf("Serving on %s", address)
 
@@ -91,7 +91,7 @@ func Serve(host string, port uint, certificate Certificate, db data.Database) {
 	proto.RegisterDoraServer(grpcServer, &DoraService{db: db})
 
 	dcreds := credentials.NewTLS(&tls.Config{
-		ServerName: host,
+		ServerName: servername,
 		RootCAs:    certificate.Pool,
 	})
 	dopts := []grpc.DialOption{grpc.WithTransportCredentials(dcreds)}

@@ -69,7 +69,6 @@ go_image(
 container_image(
     name = "dora_image",
     base = "//server:dora_image_base",
-    ports = ["8581"],
     stamp = True,
 )
 

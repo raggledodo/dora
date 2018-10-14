@@ -14,11 +14,12 @@ import (
 var cfg Config
 
 type Config struct {
-	Host     string
-	Port     uint
-	PbDir    string
-	Keyfile  string
-	Certfile string
+	Host       string
+	Port       uint
+	PbDir      string
+	Keyfile    string
+	Certfile   string
+	ServerName string
 }
 
 type Certificate struct {
@@ -31,15 +32,17 @@ const (
 	DefPbDir       = "/tmp/protodb"
 	DefKeyfile     = "certs/server.key"
 	DefCertificate = "certs/server.crt"
-	DefHost        = "localhost"
+	DefHost        = "127.0.0.1"
+	DefServer      = "localhost"
 )
 
 func init() {
-	flag.StringVar(&cfg.Host, "host", DefHost,
-		"host name used as common name in certificate")
+	flag.StringVar(&cfg.Host, "host", DefHost, "host ip server listens on")
 	flag.UintVar(&cfg.Port, "port", DefPorts, "server port")
 	flag.StringVar(&cfg.PbDir, "pbdir", DefPbDir, "protobuf storage path")
 	flag.StringVar(&cfg.Keyfile, "key", DefKeyfile, "rsa private key file")
+	flag.StringVar(&cfg.ServerName, "servername", DefServer,
+		"server name set as common name in certificate")
 	flag.StringVar(&cfg.Certfile, "cert", DefCertificate, "certificate file")
 	flag.Parse()
 
@@ -72,5 +75,6 @@ func main() {
 		Pool: pool,
 	}
 
-	Serve(cfg.Host, cfg.Port, certificate, data.NewPbFS(cfg.PbDir))
+	Serve(cfg.Host, cfg.ServerName, cfg.Port, certificate,
+		data.NewPbFS(cfg.PbDir))
 }
